@@ -6,11 +6,12 @@ type TMode = "development" | "production";
 
 interface AppEnv {
     VITE_ENV: TMode;
+    BACKEND_PROXY: string;
     PORT: string;
 }
 
 const validateEnv = (envMode: TMode, env: AppEnv) => {
-    const requiredVariables: (keyof AppEnv)[] = ["PORT", "VITE_ENV"];
+    const requiredVariables: (keyof AppEnv)[] = ["PORT", "BACKEND_PROXY", "VITE_ENV"];
 
     for (const key of requiredVariables) {
         if (!env[key]) {
@@ -37,6 +38,13 @@ export default defineConfig(({ mode }) => {
     const config: ServerOptions = {
         port,
         open: true,
+        proxy: {
+            "/api": {
+                target: env.BACKEND_PROXY,
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, "/api"),
+            },
+        },
     };
 
     return {
